@@ -1,0 +1,34 @@
+import { Usuario } from 'src/modules/gestion-usuario/usuario/domain/entities/usuario.entity';
+import { Empresa } from 'src/modules/organizacion/empresa/domain/entities/empresa.entity';
+import { Repository } from 'typeorm';
+import { Provincia } from 'src/modules/gutil/provincia/domain/entities/provincia.entity';
+import { Localidad } from 'src/modules/gutil/localidad/domain/entities/localidad.entity';
+import { Personal } from 'src/modules/organizacion/personal/domain/entities/personal.entity';
+import { Cliente } from 'src/modules/organizacion/cliente/domain/entities/cliente.entity';
+import { Rol } from 'src/modules/gestion-usuario/rol/domain/entities/rol.entity';
+import { CondicionIva } from 'src/modules/gutil/condicion-iva/domain/entities/condicion-iva.entity';
+import { Proveedor } from 'src/modules/organizacion/proveedor/domain/entities/proveedor.entity';
+import { AlicuotaIva } from 'src/modules/gutil/alicuota-iva/domain/entities/alicuota-iva.entity';
+export declare class SeedOrganizacionService {
+    private readonly personalRepository;
+    private readonly provinciaRepository;
+    private readonly condicionIVARepository;
+    private readonly localidadRepository;
+    private readonly empresaRepository;
+    private readonly clienteRepository;
+    private readonly proveedorRepository;
+    private readonly usuarioRepository;
+    private readonly alicuotaIvaRepository;
+    private readonly rolRepository;
+    configuracionSistemaRepository: any;
+    constructor(personalRepository: Repository<Personal>, provinciaRepository: Repository<Provincia>, condicionIVARepository: Repository<CondicionIva>, localidadRepository: Repository<Localidad>, empresaRepository: Repository<Empresa>, clienteRepository: Repository<Cliente>, proveedorRepository: Repository<Proveedor>, usuarioRepository: Repository<Usuario>, alicuotaIvaRepository: Repository<AlicuotaIva>, rolRepository: Repository<Rol>);
+    seedProvincia(): Promise<void>;
+    seedLocalidad(): Promise<void>;
+    seedCondicionIVA(): Promise<void>;
+    seedEmpresa(): Promise<void>;
+    seedCliente(): Promise<void>;
+    seedPersonal(): Promise<void>;
+    seedProveedor(): Promise<void>;
+    runAllSeeds(): Promise<void>;
+    seedAlicuotaIVA(): Promise<void>;
+}

@@ -1,0 +1,33 @@
+import { CondicionIvaDto } from 'src/modules/gutil/condicion-iva/dto/condicion-iva.dto';
+import { ListadoConTotalDto } from 'src/modules/common/interface/listadoConTotalDto';
+import { LocalidadDto } from 'src/modules/gutil/localidad/dto/localidad.dto';
+import { ProvinciaDto } from 'src/modules/gutil/provincia/dto/provincia.dto';
+import { OperadorDto } from 'src/modules/gestion-documentos/operador.dto';
+import { DenominacionEmpresaOperadorDto } from 'src/modules/common/dto/denominacion-empresa-operador.dto';
+import { AuditoriaDto } from 'src/modules/gestion-sistema/auditoria/dto/auditoria.dto';
+import { OperadorSearchDto } from 'src/modules/gestion-documentos/operador-search.dto';
+import { DenominacionDto } from 'src/modules/common/dto/denominacion.dto';
+import { ClienteService } from '../services/cliente.service';
+import { CreateClienteDto } from '../../dto/create-cliente.dto';
+import { PersonalSearchDto } from 'src/modules/organizacion/personal/dto/personal-search.dto';
+import { UpdateClienteDto } from '../../dto/update-cliente.dto';
+import { DenominacionEmpresaOperadorUsuarioDto } from 'src/modules/common/dto/denominacion-empresa-operador-usuario.dto';
+export declare class ClienteController {
+    private readonly service;
+    private readonly logger;
+    constructor(service: ClienteService);
+    private readonly ENTITY_NAME;
+    create(createDto: CreateClienteDto): Promise<import("../../../../common/utils/message/mensajeDto").MensajeDto<any>>;
+    findByDenominacionFiltered(paginationDto: DenominacionEmpresaOperadorDto): Promise<ListadoConTotalDto<OperadorSearchDto>>;
+    findByDenominacionVendedorFiltered(paginationDto: DenominacionEmpresaOperadorUsuarioDto): Promise<ListadoConTotalDto<OperadorSearchDto>>;
+    findAllCondicionIva(): Promise<ListadoConTotalDto<CondicionIvaDto>>;
+    findAllByVendedorDenominacion(paginationDto: DenominacionDto): Promise<ListadoConTotalDto<PersonalSearchDto>>;
+    findAllLocalidad(): Promise<ListadoConTotalDto<LocalidadDto>>;
+    findAllLocalidadFor(id: number): Promise<ListadoConTotalDto<LocalidadDto>>;
+    findAllProvincia(): Promise<ListadoConTotalDto<ProvinciaDto>>;
+    geCondicionIvaDelCliente(id: number): Promise<import("../../../../gutil/condicion-iva/domain/entities/condicion-iva.entity").CondicionIva>;
+    findOne(id: number, empresaId: number): Promise<OperadorDto>;
+    update(id: number, updateDto: UpdateClienteDto): Promise<import("../../../../common/utils/message/mensajeDto").MensajeDto<any>>;
+    remove(id: number, usuarioId: number): Promise<import("../../../../common/utils/message/mensajeDto").MensajeDto<any>>;
+    findByIdConAuditoria(id: number): Promise<AuditoriaDto>;
+}

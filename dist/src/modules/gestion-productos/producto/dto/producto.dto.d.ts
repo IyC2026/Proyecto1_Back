@@ -1,0 +1,30 @@
+import { AlicuotaIva } from 'src/modules/organizacion/enums/alicuota-iva.enum';
+import { ReferenciaDto } from 'src/modules/common/dto/referencia.dto';
+export declare class ProductoDto {
+    id: number;
+    denominacion: string;
+    observacion?: string;
+    codigoProveedor: string;
+    codigoBarra?: string;
+    stock: number;
+    costo: number;
+    precio: number;
+    porcentaje: number;
+    costoEnDolar: boolean;
+    costoDolar: number;
+    cotizacionDolar: number;
+    precioDolar: number;
+    destacado: boolean;
+    envioGratis: boolean;
+    linea?: ReferenciaDto;
+    marca?: ReferenciaDto;
+    proveedor?: ReferenciaDto;
+    alicuotaIva: AlicuotaIva;
+    ubicacion: string;
+    utilizaStockMinimo: boolean;
+    stockMinimo: number;
+    utilizaPack: boolean;
+    cantidadPorPack: number;
+    sistema: number;
+    codigoReferencia?: string;
+}

@@ -1,0 +1,38 @@
+import { Domicilio } from 'src/modules/gutil/domicilio/entities/domicilio.entity';
+import { Usuario } from 'src/modules/gestion-usuario/usuario/domain/entities/usuario.entity';
+import { Personal } from 'src/modules/organizacion/personal/domain/entities/personal.entity';
+import { ClienteOperacion } from 'src/modules/organizacion/cliente-operacion/entities/cliente-operacion.entity';
+import { CondicionIva } from 'src/modules/gutil/condicion-iva/domain/entities/condicion-iva.entity';
+export declare class Cliente {
+    id: number;
+    codigo?: string;
+    denominacion: string;
+    denominacionAfip?: string;
+    cuit?: string | null;
+    dni?: string | null;
+    telefono?: string | null;
+    celular?: string | null;
+    mail?: string | null;
+    telefonoAlternativo?: string | null;
+    emailAlternativo?: string | null;
+    sitioWeb?: string | null;
+    contactoNombre?: string | null;
+    contactoCargo?: string | null;
+    condicionIvaId?: number;
+    condicionIva: CondicionIva;
+    personalId?: number;
+    personal: Personal;
+    domicilio: Domicilio;
+    observacion?: string;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt?: Date;
+    usuarioCreated: Usuario;
+    usuarioUpdated: Usuario;
+    usuarioDeleted: Usuario;
+    clientesOperacion: ClienteOperacion[];
+    sistema: number;
+    ultimoPedido?: Date;
+    ultimoFactura?: Date;
+    ultimoRecibo?: Date;
+}

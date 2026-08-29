@@ -1,0 +1,38 @@
+import { Empresa } from '../../../../organizacion/empresa/domain/entities/empresa.entity';
+export declare class ConfiguracionSistema {
+    id: number;
+    empresa: Empresa;
+    caracteresParaBusqueda: number;
+    multiEmpresa: boolean;
+    libroCajaUnico: boolean;
+    diasMaximosLibroCaja: number;
+    carteraChequeUnico: boolean;
+    ocultarTotalesDocumento: boolean;
+    visibleSubTotalNoGravado: boolean;
+    visibleSubTotal: boolean;
+    visibleIva105: boolean;
+    visibleIva21: boolean;
+    take: number;
+    busquedaInicial: boolean;
+    maximoDolar: number;
+    maxDigitosPorcentajePrecio: number;
+    maxDigitosPorcentajePrecioMayorista: number;
+    maxDigitosPrecio: number;
+    aniosEmisionMaximoAtras: number;
+    aniosVencimientoMaximoAdelante: number;
+    unidadMedida: boolean;
+    estadisticasProducto: boolean;
+    porcentajeAumento: number;
+    precioConIvaVisible: boolean;
+    precioOferta: boolean;
+    costoDolar: boolean;
+    facturaElectronica: boolean;
+    clientePoseePersonal: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    deletedAt?: Date;
+    usuarioCreatedId?: number;
+    usuarioDeletedId?: number;
+    usuarioUpdatedId?: number;
+    sistema: number;
+}

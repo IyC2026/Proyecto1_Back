@@ -1,0 +1,7 @@
+import { CreatePersonalDto } from './create-personal.dto';
+declare const UpdatePersonalDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreatePersonalDto>>;
+export declare class UpdatePersonalDto extends UpdatePersonalDto_base {
+    updatedAt: Date;
+    usuarioUpdatedId: number;
+}
+export {};

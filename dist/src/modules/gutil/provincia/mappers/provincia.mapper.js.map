@@ -1,0 +1,1 @@
+{"version":3,"file":"provincia.mapper.js","sourceRoot":"","sources":["../../../../../../src/modules/gutil/provincia/mappers/provincia.mapper.ts"],"names":[],"mappings":";;;AAIA,MAAa,eAAe;IAC1B,MAAM,CAAC,KAAK,CAAC,MAAgB;QAE3B,OAAO;YACL,EAAE,EAAE,MAAM,CAAC,EAAE;YACb,YAAY,EAAE,MAAM,CAAC,YAAY,IAAI,EAAE;SAExC,CAAC;IACJ,CAAC;CACF;AATD,0CASC"}

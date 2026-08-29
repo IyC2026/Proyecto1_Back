@@ -16,7 +16,7 @@ import { AlicuotaIva } from "./modules/organizacion/enums/alicuota-iva.enum";
 import { Personal } from "./modules/organizacion/personal/domain/entities/personal.entity";
 import { Proveedor } from "./modules/organizacion/proveedor/domain/entities/proveedor.entity";
 
-
+ 
 export const entities = [Marca,
                         Linea, 
                         Producto,
