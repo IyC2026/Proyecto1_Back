@@ -89,6 +89,8 @@ export class ProductoMapper {
       envioGratis: entity.envioGratis ?? false,
       linea: toReferenciaDto(entity.linea),
       marca: toReferenciaDto(entity.marca),
+      presentacion: toReferenciaDto(entity.presentacion),
+      denominacionPersonalizada: entity.denominacionPersonalizada ?? false,
       alicuotaIva: entity.alicuotaIva,
       ubicacion: entity.ubicacion ?? '',
       utilizaStockMinimo: entity.utilizaStockMinimo ?? false,
@@ -97,9 +99,6 @@ export class ProductoMapper {
       cantidadPorPack: entity.cantidadPorPack ?? 0,
       sistema: entity.sistema,
       codigoReferencia: entity.codigoReferencia ?? '',
-
-    
-      
     };
   }
 

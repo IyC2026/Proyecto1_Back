@@ -80,6 +80,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
         .createQueryBuilder('producto')
         .leftJoinAndSelect('producto.linea', 'linea')
         .leftJoinAndSelect('producto.marca', 'marca')
+        .leftJoinAndSelect('producto.presentacion', 'presentacion')
         .where('producto.id = :id', { id })
         .andWhere('producto.deletedAt IS NULL')
         .getOne();
@@ -233,6 +234,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
       .createQueryBuilder('producto')
       .leftJoinAndSelect('producto.marca', 'marca')
       .leftJoinAndSelect('producto.linea', 'linea')
+      .leftJoinAndSelect('producto.presentacion', 'presentacion')
 
     if (denominacion || codigoProveedor || codigoReferencia) {
       const condiciones: string[] = [];
@@ -306,6 +308,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
       .createQueryBuilder('producto')
       .leftJoinAndSelect('producto.marca', 'marca')
       .leftJoinAndSelect('producto.linea', 'linea')
+      .leftJoinAndSelect('producto.presentacion', 'presentacion')
       .leftJoinAndSelect('producto.proveedor', 'proveedor')
       .where('producto.deletedAt IS NULL');
 
@@ -433,6 +436,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
         .createQueryBuilder('producto')
         .leftJoinAndSelect('producto.marca', 'marca')
         .leftJoinAndSelect('producto.linea', 'linea')
+        .leftJoinAndSelect('producto.presentacion', 'presentacion')
 
       query.andWhere('producto.deletedAt IS NULL');
       query.orderBy('producto.denominacion', 'ASC');

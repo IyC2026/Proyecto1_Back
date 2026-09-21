@@ -5,17 +5,19 @@ import { toReferenciaDto } from 'src/modules/common/utils/mappers/referencia.map
 
 export class LineaMapper {
   private static readonly logger = new Logger(LineaMapper.name);
-
-  static toDto(entity: Linea): LineaDto {
+    //SUPERLÍNEA--------------------------------
+    static toDto(entity: Linea): LineaDto {
     return {
       id: entity.id,
       denominacion: entity.denominacion,
       stockMinimo: entity.stockMinimo,
       utilizaStockMinimo: entity.utilizaStockMinimo,
       observacion: entity.observacion ?? '',
+      superLineaId: entity.superLineaId,
+      superLineaNombre: entity.superLinea?.denominacion ?? '',
       sistema: entity.sistema,
       deletedAt: entity.deletedAt ? entity.deletedAt.toISOString() : null,
-
     };
   }
+
 }

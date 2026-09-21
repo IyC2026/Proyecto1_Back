@@ -7,6 +7,7 @@ import {
   IsInt,
   IsEnum,
   ValidateNested,
+  IsOptional,
 } from 'class-validator';
 import { AlicuotaIva } from 'src/modules/organizacion/enums/alicuota-iva.enum';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -97,6 +98,21 @@ export class ProductoDto {
   @ValidateNested()
   @Type(() => ReferenciaDto)
   marca?: ReferenciaDto;
+
+  @ApiPropertyOptional({
+    type: () => ReferenciaDto,
+    description: 'Presentación asociada al producto',
+  })
+  @ValidateNested()
+  @Type(() => ReferenciaDto)
+  presentacion?: ReferenciaDto;
+
+  @ApiPropertyOptional({
+    description: 'Indica si la denominación fue editada manualmente',
+  })
+  @IsOptional()
+  @IsBoolean()
+  denominacionPersonalizada?: boolean;
 
 
   @ApiProperty({

@@ -1,8 +1,16 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateLineaDto } from './create-linea.dto';
-import { IsNotEmpty, IsInt, IsBoolean } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsInt, IsBoolean } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger/dist/decorators';
 
 export class UpdateLineaDto extends PartialType(CreateLineaDto) {
+    //SUPERLÍNEA--------------------------------
+    @ApiProperty({ description: 'ID de la SuperLínea a la que pertenece', example: 1, required: false })
+    @IsOptional()
+    @IsInt({ message: 'El superLineaId debe ser un número entero.' })
+    superLineaId?: number;
+    //----------------------------------------
+
 
     @IsBoolean()
     utilizaStockMinimo: boolean;

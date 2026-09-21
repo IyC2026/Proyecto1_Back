@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PresentacionModule } from './modules/gestion-productos/presentacion/presentacion.module';
+import { SuperLineaModule } from './modules/gestion-productos/super-linea/super-linea.module';
 import { MarcaModule } from './modules/gestion-productos/marca/marca.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LineaModule } from './modules/gestion-productos/linea/linea.module';
@@ -53,6 +55,8 @@ import { BusquedasModule } from './modules/gestion-documentos/busquedas/busqueda
         : undefined,
     }),
 
+    PresentacionModule,
+    SuperLineaModule,
     MarcaModule,
     LineaModule,
     ProductoModule,

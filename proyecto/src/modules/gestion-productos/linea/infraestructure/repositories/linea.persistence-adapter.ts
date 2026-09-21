@@ -47,6 +47,8 @@ export class LineaPersistenceAdapter
         stockMinimo: data.stockMinimo,
         usuarioCreatedId: data.usuarioCreatedId,
         observacion: data.observacion,
+        //SUPERLINEA------------------------------
+        superLineaId: data.superLineaId, 
       });
 
       const entityGuardada = await repo.save(nuevaEntity);
@@ -81,6 +83,10 @@ export class LineaPersistenceAdapter
     entity.utilizaStockMinimo = data.utilizaStockMinimo;
     entity.stockMinimo = data.stockMinimo ?? 0;
     entity.usuarioCreatedId = data.usuarioCreatedId;
+    //SUPERLINEA------------------------------
+    if (data.superLineaId) entity.superLineaId = data.superLineaId;
+
+
 
     // Guardar entidad antes de procesar sublíneas (opcional según lógica de negocio)
     const entityActualizada = await repo.save(entity);
@@ -92,6 +98,10 @@ export class LineaPersistenceAdapter
     try {
       const entity = await this.repository
         .createQueryBuilder('linea')
+
+        //SUPERLINEA------------------------------
+        .leftJoinAndSelect('linea.superLinea', 'superLinea')
+
         .where('linea.id = :id', { id })
         .andWhere('linea.deletedAt IS NULL')
         .getOne();
@@ -179,6 +189,9 @@ export class LineaPersistenceAdapter
   ): Promise<{ data: Linea[]; total: number }> {
     try {
       const query = this.baseQuery(incluirEliminados)
+      
+      //SUPERLINEA------------------------------
+        .leftJoinAndSelect(`${this.ALIAS}.superLinea`, 'superLinea');
 
       if (denominacion) {
         query.andWhere(`UPPER(${this.ALIAS}.denominacion) LIKE :denominacion`, {

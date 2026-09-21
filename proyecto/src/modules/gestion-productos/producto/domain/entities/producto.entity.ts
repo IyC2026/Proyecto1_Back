@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Linea } from '../../../linea/domain/entities/linea.entity';
 import { Marca } from '../../../marca/domain/entities/marca.entity';
+import { Presentacion } from '../../../presentacion/domain/entities/presentacion.entity';
 import { AlicuotaIva } from 'src/modules/organizacion/enums/alicuota-iva.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProductoOperacion } from '../../../producto-operacion/entities/producto-operacion.entity';
@@ -149,6 +150,18 @@ export class Producto {
   @Column({ type: 'int', nullable: true })
   marcaId?: number;
 
+  // ========== PRESENTACION ==========
+  @ApiProperty({ description: 'Formato de presentación comercial' })
+  @ManyToOne(() => Presentacion, (presentacion) => presentacion.productos)
+  @JoinColumn({ name: 'presentacion_id' })
+  presentacion: Presentacion;
+
+  @Column({ type: 'int', nullable: true })
+  presentacionId?: number;
+
+  @ApiProperty({ description: 'Indica si la denominación fue editada manualmente por el usuario' })
+  @Column('boolean', { default: false })
+  denominacionPersonalizada: boolean;
 
   @Column({ default: false })
   utilizaPack: boolean;

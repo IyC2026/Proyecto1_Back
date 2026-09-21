@@ -1,3 +1,7 @@
+import { SuperLinea } from '../../../super-linea/domain/entities/super-linea.entity';
+import { ApiProperty } from '@nestjs/swagger';
+
+
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,6 +11,8 @@ import {
   DeleteDateColumn,
   OneToMany,
   Index,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 import { Producto } from '../../../producto/domain/entities/producto.entity';
@@ -15,6 +21,20 @@ import { CantidadColumn } from 'src/modules/common/decorators/cantidad-column.de
 @Entity('linea')
 @Index(['denominacion', 'deletedAt'], { unique: true })
 export class Linea {
+
+  //SUPER LÍNEA-------------------------------
+  @ApiProperty({ description: 'SuperLínea a la que pertenece', required: true })
+  @ManyToOne(() => SuperLinea, (superLinea) => superLinea.lineas)
+  @JoinColumn({ name: 'super_linea_id' })
+  @Index()
+  superLinea: SuperLinea;
+
+  @ApiProperty({ description: 'ID de la SuperLínea padre' })
+  @Column({ type: 'int', nullable: false })
+  superLineaId: number;
+//----------------------------------------
+
+
   @PrimaryGeneratedColumn()
   id: number;
 
