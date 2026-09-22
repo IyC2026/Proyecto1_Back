@@ -36,7 +36,7 @@ import { CambioPrecioDto } from '../../dto/cambio-precio.dto';
 
 @ApiTags('Gestion Productos')
 @Controller('producto')
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 export class ProductoController {
   private readonly logger = new Logger(ProductoController.name);
   constructor(
