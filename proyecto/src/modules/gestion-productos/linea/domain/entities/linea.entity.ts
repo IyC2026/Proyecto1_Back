@@ -23,15 +23,15 @@ import { CantidadColumn } from 'src/modules/common/decorators/cantidad-column.de
 export class Linea {
 
   //SUPER LÍNEA-------------------------------
-  @ApiProperty({ description: 'SuperLínea a la que pertenece', required: true })
+  @ApiProperty({ description: 'SuperLínea a la que pertenece', required: false })
   @ManyToOne(() => SuperLinea, (superLinea) => superLinea.lineas)
   @JoinColumn({ name: 'super_linea_id' })
   @Index()
   superLinea: SuperLinea;
 
-  @ApiProperty({ description: 'ID de la SuperLínea padre' })
-  @Column({ type: 'int', nullable: false })
-  superLineaId: number;
+  @ApiProperty({ description: 'ID de la SuperLínea padre', required: false })
+  @Column({ name: 'super_linea_id', type: 'int', nullable: true })
+  superLineaId?: number | null;
 //----------------------------------------
 
 

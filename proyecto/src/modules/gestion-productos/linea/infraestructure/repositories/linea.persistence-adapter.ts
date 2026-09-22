@@ -84,7 +84,7 @@ export class LineaPersistenceAdapter
     entity.stockMinimo = data.stockMinimo ?? 0;
     entity.usuarioCreatedId = data.usuarioCreatedId;
     //SUPERLINEA------------------------------
-    if (data.superLineaId) entity.superLineaId = data.superLineaId;
+    if (data.superLineaId !== undefined) entity.superLineaId = data.superLineaId;
 
 
 

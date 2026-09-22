@@ -156,7 +156,7 @@ export class Producto {
   @JoinColumn({ name: 'presentacion_id' })
   presentacion: Presentacion;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ name: 'presentacion_id', type: 'int', nullable: true })
   presentacionId?: number;
 
   @ApiProperty({ description: 'Indica si la denominación fue editada manualmente por el usuario' })
