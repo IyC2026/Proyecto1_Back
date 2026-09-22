@@ -52,6 +52,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
         ...data,
         linea,
         marca,
+        presentacion: data.presentacionId ? ({ id: data.presentacionId } as any) : undefined,
         usuarioCreated: usuario,
       });
 
@@ -179,6 +180,9 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
       Object.assign(entity, dataSinItems, {
         linea,
         marca,
+        presentacion: data.presentacionId !== undefined
+          ? (data.presentacionId ? ({ id: data.presentacionId } as any) : null)
+          : entity.presentacion,
       });
 
       entity.usuarioUpdated = usuario; 
