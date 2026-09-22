@@ -198,7 +198,6 @@ export class ProductoController {
   }
 
   @Put(':id/precio')
-  @Roles('Root', 'Administrador', 'Empleado')
   async updatePrecio(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CambioPrecioDto,
@@ -217,7 +216,6 @@ export class ProductoController {
   }
 
   @Get(':id/historial-precio')
-  @Roles('Root', 'Administrador', 'Empleado')
   async getHistorialPrecio(@Param('id', ParseIntPipe) id: number) {
     return this.precioService.getHistorial(id);
   }
