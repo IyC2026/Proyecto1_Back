@@ -3,7 +3,9 @@ import { ProductoController } from './application/controllers/producto.controlle
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NormalizeDenominacionPipe } from 'src/modules/common/pipes/normalize-denominations.pipe';
 import { Producto } from './domain/entities/producto.entity';
+import { HistorialPrecio } from './domain/entities/historial-precio.entity';
 import { ProductoRepository } from './infraestructure/repositories/producto.repository';
+import { HistorialPrecioRepository } from './infraestructure/repositories/historial-precio.repository';
 import { LineaModule } from '../linea/linea.module';
 import { MarcaModule } from '../marca/marca.module';
 import { TypeOrmUnitOfWork } from 'src/modules/common/unit-of-work/type-orm-unit-of-works1';
@@ -13,6 +15,7 @@ import { ProveedorModule } from 'src/modules/organizacion/proveedor/proveedor.mo
 import { UsuarioModule } from 'src/modules/gestion-usuario/usuario/usuario.module';
 import { CommonModule } from 'src/modules/common/common.module';
 import { ProductoService } from './application/services/producto.service';
+import { ProductoPrecioService } from './application/services/producto-precio.service';
 import { ProductoPersistenceAdapter } from './infraestructure/repositories/producto.persistence-adapters';
 import { ProductoUniquenessValidator } from './infraestructure/validators/producto-uniqueness.validator.ts';
 import { ProductoRelatedEntitiesValidator } from './infraestructure/validators/producto-related-entities.validator.ts';
@@ -23,7 +26,7 @@ import { ProductoDeletePolicy } from './application/policies/producto-delete.pol
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Producto]),
+    TypeOrmModule.forFeature([Producto, HistorialPrecio]),
     CommonModule,
     forwardRef(() => LineaModule),
     forwardRef(() => MarcaModule),
@@ -35,6 +38,8 @@ import { ProductoDeletePolicy } from './application/policies/producto-delete.pol
   
   providers: [
     ProductoService,
+    ProductoPrecioService,
+    HistorialPrecioRepository,
     ProductoIntrinsicValidationService,
     ProductoValidationService,
     ProductoRelatedEntitiesValidator,
@@ -59,6 +64,8 @@ import { ProductoDeletePolicy } from './application/policies/producto-delete.pol
   exports: [
     TypeOrmModule,
     ProductoService,
+    ProductoPrecioService,
+    HistorialPrecioRepository,
     ProductoPersistenceAdapter,
     'IProductoRepository',
   ],

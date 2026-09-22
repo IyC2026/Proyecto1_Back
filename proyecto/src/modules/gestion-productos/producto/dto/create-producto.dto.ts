@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsInt,
   IsEnum,
+  Min,
 } from 'class-validator';
 import { AlicuotaIva } from 'src/modules/organizacion/enums/alicuota-iva.enum';
 
@@ -111,6 +112,7 @@ export class CreateProductoDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0.01, { message: 'El precio inicial debe ser mayor a cero.' })
   precio: number;
 
   createdAt?: Date;

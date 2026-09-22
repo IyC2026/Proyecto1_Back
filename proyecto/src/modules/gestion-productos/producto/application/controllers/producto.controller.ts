@@ -31,14 +31,18 @@ import { NormalizeDenominacionSearchPipe } from 'src/modules/common/pipes/normal
 import { DenominacionBusquedaDto } from 'src/modules/common/dto/denominacion-busqueda.dto';
 import { SearchProductoRapidoDto } from '../../dto/search-producto-rapido.dto';
 import { ProductoService } from '../services/producto.service';
-
+import { ProductoPrecioService } from '../services/producto-precio.service';
+import { CambioPrecioDto } from '../../dto/cambio-precio.dto';
 
 @ApiTags('Gestion Productos')
 @Controller('producto')
 @UseGuards(AuthGuard)
 export class ProductoController {
   private readonly logger = new Logger(ProductoController.name);
-  constructor(private readonly service: ProductoService) {}
+  constructor(
+    private readonly service: ProductoService,
+    private readonly precioService: ProductoPrecioService
+  ) {}
 
   private readonly ENTITY_NAME = 'Producto';
 
@@ -191,5 +195,30 @@ export class ProductoController {
   ): Promise<AuditoriaDto> {
     const data = await this.service.findByIdConAuditoria(id);
     return data;
+  }
+
+  @Put(':id/precio')
+  @Roles('Root', 'Administrador', 'Empleado')
+  async updatePrecio(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CambioPrecioDto,
+  ) {
+    this.logger.log(`Actualizando precio del Producto con ID: ${id}`);
+    
+    const productoActual = await this.service.findEntityById(id);
+
+    return this.precioService.registerPriceChange({
+      productoId: id,
+      precioAnterior: productoActual.precio ?? 0,
+      precioNuevo: dto.precioNuevo,
+      motivo: dto.motivo,
+      usuarioId: dto.usuarioId,
+    });
+  }
+
+  @Get(':id/historial-precio')
+  @Roles('Root', 'Administrador', 'Empleado')
+  async getHistorialPrecio(@Param('id', ParseIntPipe) id: number) {
+    return this.precioService.getHistorial(id);
   }
 }
