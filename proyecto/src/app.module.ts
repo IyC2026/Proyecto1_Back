@@ -29,6 +29,7 @@ import { EmpresaOperacionModule } from './modules/organizacion/empresa-operacion
 import { ClienteOperacionModule } from './modules/organizacion/cliente-operacion/cliente-operacion.module';
 import { ProductoOperacionModule } from './modules/gestion-productos/producto-operacion/producto-operacion.module';
 import { BusquedasModule } from './modules/gestion-documentos/busquedas/busquedas.module';
+import { CambioPrecioMasivoModule } from './modules/gestion-productos/cambio-precio-masivo/cambio-precio-masivo.module';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { BusquedasModule } from './modules/gestion-documentos/busquedas/busqueda
     ClienteOperacionModule,
     ProductoOperacionModule,
     BusquedasModule,
+    CambioPrecioMasivoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
