@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { Producto } from '../../domain/entities/producto.entity';
 import { HistorialPrecio } from '../../domain/entities/historial-precio.entity';
 
@@ -14,47 +14,54 @@ export class ProductoPrecioService {
     private readonly historialRepository: Repository<HistorialPrecio>,
   ) {}
 
-  async registerPriceChange(params: {
-    productoId: number;
-    precioAnterior: number;
-    precioNuevo: number;
-    motivo: string;
-    usuarioId: number;
-  }): Promise<HistorialPrecio> {
+  async registerPriceChange(
+    params: {
+      productoId: number;
+      precioAnterior: number;
+      precioNuevo: number;
+      motivo: string;
+      usuarioId: number;
+    },
+    manager?: EntityManager,
+  ): Promise<HistorialPrecio> {
     const { productoId, precioAnterior, precioNuevo, motivo, usuarioId } = params;
 
-    // Validación de precio > 0
     if (precioNuevo <= 0) {
       throw new BadRequestException('El precio debe ser mayor a cero.');
     }
 
-    // Validación de motivo no vacío
     if (!motivo || motivo.trim() === '') {
       throw new BadRequestException('El motivo del cambio no puede quedar vacío.');
     }
 
-    const producto = await this.productoRepository.findOne({
-      where: { id: productoId },
-    });
+    const producto = manager
+      ? await manager.findOne(Producto, {
+          where: { id: productoId },
+        })
+      : await this.productoRepository.findOne({
+          where: { id: productoId },
+        });
 
     if (!producto) {
       throw new NotFoundException(`Producto con ID ${productoId} no encontrado.`);
     }
 
     let historialGuardado: HistorialPrecio;
+    let queryRunner: any;
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+    if (!manager) {
+      queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+    }
 
     try {
-      // Actualizar el precio del producto
       producto.precio = precioNuevo;
       producto.usuarioUpdated = { id: usuarioId } as any;
-      
-      await queryRunner.manager.save(Producto, producto);
 
-      // Crear registro histórico
+      const effectiveManager = manager ?? queryRunner.manager;
+      await effectiveManager.save(Producto, producto);
+
       const historial = new HistorialPrecio();
       historial.precioAnterior = precioAnterior;
       historial.precioNuevo = precioNuevo;
@@ -62,14 +69,20 @@ export class ProductoPrecioService {
       historial.productoId = productoId;
       historial.usuarioId = usuarioId;
 
-      historialGuardado = await queryRunner.manager.save(HistorialPrecio, historial);
+      historialGuardado = await effectiveManager.save(HistorialPrecio, historial);
 
-      await queryRunner.commitTransaction();
+      if (queryRunner) {
+        await queryRunner.commitTransaction();
+      }
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      if (queryRunner) {
+        await queryRunner.rollbackTransaction();
+      }
       throw error;
     } finally {
-      await queryRunner.release();
+      if (queryRunner) {
+        await queryRunner.release();
+      }
     }
 
     return historialGuardado;
