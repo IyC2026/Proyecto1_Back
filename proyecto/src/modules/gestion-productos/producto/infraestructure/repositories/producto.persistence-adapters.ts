@@ -232,12 +232,16 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
     conStock: boolean,
     skip: number,
     take: number,
+    lineaDenominacion?: string,
+    superLineaDenominacion?: string,
+    superLinea_id?: number,
   ): Promise<{ data: Producto[]; total: number }> {
     this.logger.warn(`llega`);
     const query = this.repository
       .createQueryBuilder('producto')
       .leftJoinAndSelect('producto.marca', 'marca')
       .leftJoinAndSelect('producto.linea', 'linea')
+      .leftJoinAndSelect('linea.superLinea', 'superLinea')
       .leftJoinAndSelect('producto.presentacion', 'presentacion')
 
     if (denominacion || codigoProveedor || codigoReferencia) {
@@ -280,6 +284,19 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
     }
     if (linea_id) {
       query.andWhere('linea.id = :linea_id', { linea_id });
+    }
+    if (lineaDenominacion) {
+      query.andWhere('UPPER(linea.denominacion) LIKE UPPER(:lineaDenominacion)', {
+        lineaDenominacion: `%${lineaDenominacion}%`,
+      });
+    }
+    if (superLineaDenominacion) {
+      query.andWhere('UPPER(superLinea.denominacion) LIKE UPPER(:superLineaDenominacion)', {
+        superLineaDenominacion: `%${superLineaDenominacion}%`,
+      });
+    }
+    if (superLinea_id) {
+      query.andWhere('superLinea.id = :superLinea_id', { superLinea_id });
     }
 
     this.logger.warn(`conStock llega como: ${conStock} (${typeof conStock})`);
