@@ -9,11 +9,11 @@ export class SearchProductoPaginationWithDto {
   @IsOptional()
   @IsString()
   codigoProveedor: string;
- 
+
   @IsOptional()
   @IsString()
   codigoReferencia: string;
-  
+
   @Transform(({ value }) => {
     if (value === 'true') return true;
     if (value === 'false') return false;
@@ -40,7 +40,6 @@ export class SearchProductoPaginationWithDto {
   @Type(() => Number)
   take: number = 10;
 
-
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -54,7 +53,12 @@ export class SearchProductoPaginationWithDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  proveedorId: number; 
+  superLineaId: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  proveedorId: number;
 
   @IsOptional()
   @Transform(({ value }) => {
@@ -64,5 +68,13 @@ export class SearchProductoPaginationWithDto {
   })
   @IsBoolean()
   conStock: boolean;
+
+  @IsOptional()
+  @IsString()
+  lineaDenominacion?: string;
+
+  @IsOptional()
+  @IsString()
+  superLineaDenominacion?: string;
 
 }
