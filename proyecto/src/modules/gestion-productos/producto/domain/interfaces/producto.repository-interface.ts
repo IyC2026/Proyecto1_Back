@@ -31,6 +31,9 @@ export interface IProductoRepository {
     conStock: boolean,
     skip: number,
     take: number,
+    lineaDenominacion?: string,
+    superLineaDenominacion?: string,
+    superLinea_id?: number,
   ): Promise<{ data: Producto[]; total: number }>;
 
   findByRapido(

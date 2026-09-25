@@ -31,7 +31,7 @@ export class Linea {
 
   @ApiProperty({ description: 'ID de la SuperLínea padre', required: false })
   @Column({ name: 'super_linea_id', type: 'int', nullable: true })
-  superLineaId?: number | null;
+  superLineaId: number;
 //----------------------------------------
 
 

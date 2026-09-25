@@ -136,6 +136,9 @@ export class ProductoService {
     conStock: boolean,
     skip: number,
     take: number,
+    lineaDenominacion?: string,
+    superLineaDenominacion?: string,
+    superLinea_id?: number,
   ): Promise<{ data: GetProductoDto[]; total: number }> {
     this.logger.warn(`service`);
     const result = await this.repository.findBy(
@@ -149,6 +152,9 @@ export class ProductoService {
       conStock,
       skip,
       take,
+      lineaDenominacion,
+      superLineaDenominacion,
+      superLinea_id,
     );
     return {
       data: result.data.map((producto) => {
