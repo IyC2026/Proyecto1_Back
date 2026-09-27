@@ -52,6 +52,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
         ...data,
         linea,
         marca,
+        presentacion: data.presentacionId ? ({ id: data.presentacionId } as any) : undefined,
         usuarioCreated: usuario,
       });
 
@@ -80,6 +81,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
         .createQueryBuilder('producto')
         .leftJoinAndSelect('producto.linea', 'linea')
         .leftJoinAndSelect('producto.marca', 'marca')
+        .leftJoinAndSelect('producto.presentacion', 'presentacion')
         .where('producto.id = :id', { id })
         .andWhere('producto.deletedAt IS NULL')
         .getOne();
@@ -178,6 +180,9 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
       Object.assign(entity, dataSinItems, {
         linea,
         marca,
+        presentacion: data.presentacionId !== undefined
+          ? (data.presentacionId ? ({ id: data.presentacionId } as any) : null)
+          : entity.presentacion,
       });
 
       entity.usuarioUpdated = usuario; 
@@ -227,12 +232,17 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
     conStock: boolean,
     skip: number,
     take: number,
+    lineaDenominacion?: string,
+    superLineaDenominacion?: string,
+    superLinea_id?: number,
   ): Promise<{ data: Producto[]; total: number }> {
     this.logger.warn(`llega`);
     const query = this.repository
       .createQueryBuilder('producto')
       .leftJoinAndSelect('producto.marca', 'marca')
       .leftJoinAndSelect('producto.linea', 'linea')
+      .leftJoinAndSelect('linea.superLinea', 'superLinea')
+      .leftJoinAndSelect('producto.presentacion', 'presentacion')
 
     if (denominacion || codigoProveedor || codigoReferencia) {
       const condiciones: string[] = [];
@@ -240,7 +250,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
 
       if (denominacion) {
         condiciones.push(
-          `UPPER(producto.denominacion) LIKE UPPER(:denominacion)`,
+          `(UPPER(producto.denominacion) LIKE UPPER(:denominacion) OR UPPER(linea.denominacion) LIKE UPPER(:denominacion) OR UPPER(superLinea.denominacion) LIKE UPPER(:denominacion))`,
         );
         parametros.denominacion = `%${denominacion}%`;
       }
@@ -275,6 +285,19 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
     if (linea_id) {
       query.andWhere('linea.id = :linea_id', { linea_id });
     }
+    if (lineaDenominacion) {
+      query.andWhere('UPPER(linea.denominacion) LIKE UPPER(:lineaDenominacion)', {
+        lineaDenominacion: `%${lineaDenominacion}%`,
+      });
+    }
+    if (superLineaDenominacion) {
+      query.andWhere('UPPER(superLinea.denominacion) LIKE UPPER(:superLineaDenominacion)', {
+        superLineaDenominacion: `%${superLineaDenominacion}%`,
+      });
+    }
+    if (superLinea_id) {
+      query.andWhere('superLinea.id = :superLinea_id', { superLinea_id });
+    }
 
     this.logger.warn(`conStock llega como: ${conStock} (${typeof conStock})`);
 
@@ -282,7 +305,26 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
       query.andWhere('producto.stock > 0');
     }
     query.andWhere('producto.deletedAt IS NULL');
-    query.orderBy('producto.denominacion', 'ASC');
+    if (denominacion) {
+      query
+        .orderBy(
+          `CASE
+            WHEN UPPER(producto.denominacion) = UPPER(:terminoExacto) THEN 0
+            WHEN UPPER(producto.denominacion) LIKE UPPER(:terminoInicio)
+              OR UPPER(linea.denominacion) LIKE UPPER(:terminoInicio)
+              OR UPPER(superLinea.denominacion) LIKE UPPER(:terminoInicio) THEN 1
+            ELSE 2
+          END`,
+          'ASC',
+        )
+        .addOrderBy('producto.denominacion', 'ASC')
+        .setParameters({
+          terminoExacto: denominacion,
+          terminoInicio: `${denominacion}%`,
+        });
+    } else {
+      query.orderBy('producto.denominacion', 'ASC');
+    }
     // Paginación
     query.skip(skip).take(take);
 
@@ -306,6 +348,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
       .createQueryBuilder('producto')
       .leftJoinAndSelect('producto.marca', 'marca')
       .leftJoinAndSelect('producto.linea', 'linea')
+      .leftJoinAndSelect('producto.presentacion', 'presentacion')
       .leftJoinAndSelect('producto.proveedor', 'proveedor')
       .where('producto.deletedAt IS NULL');
 
@@ -433,6 +476,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
         .createQueryBuilder('producto')
         .leftJoinAndSelect('producto.marca', 'marca')
         .leftJoinAndSelect('producto.linea', 'linea')
+        .leftJoinAndSelect('producto.presentacion', 'presentacion')
 
       query.andWhere('producto.deletedAt IS NULL');
       query.orderBy('producto.denominacion', 'ASC');

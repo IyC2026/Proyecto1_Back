@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -27,6 +28,7 @@ import { ProductoRelatedEntitiesValidator } from '../../infraestructure/validato
 import { ProductoUniquenessValidator } from '../../infraestructure/validators/producto-uniqueness.validator.ts';
 import { UsuarioValidator } from 'src/modules/common/utils/validation/usuario-validator';
 import { ProductoDeletePolicy } from '../policies/producto-delete.policy';
+import { DenominacionProducto } from '../../domain/value-objects/denominacion-producto.vo';
 @Injectable()
 export class ProductoService {
   private readonly logger = new Logger(ProductoService.name);
@@ -61,13 +63,13 @@ export class ProductoService {
     );
 
     // Orquestar todas las validaciones
-    const { marca, linea, usuario } =
+    const { marca, linea, presentacion, usuario, productoDto } =
       await this.validarYPrepararCreacion(dto);
 
 
 
     const entity = await this.repository.create(
-      dto,
+      productoDto,
       linea,
       marca,
 
@@ -84,12 +86,12 @@ export class ProductoService {
   async update(id: number, dto: UpdateProductoDto) {
     this.logger.log(`Actualizandox  ${this.ENTITY_NAME} con ID: ${id}`);
 
-    const { marca, linea, usuario } =
+    const { marca, linea, presentacion, usuario, productoDto } =
       await this.validarYPrepararActualizacion(id, dto);
 
     const entity = await this.repository.update(
       id,
-      dto,
+      productoDto,
       linea,
       marca,
 
@@ -136,6 +138,9 @@ export class ProductoService {
     conStock: boolean,
     skip: number,
     take: number,
+    lineaDenominacion?: string,
+    superLineaDenominacion?: string,
+    superLinea_id?: number,
   ): Promise<{ data: GetProductoDto[]; total: number }> {
     this.logger.warn(`service`);
     const result = await this.repository.findBy(
@@ -149,6 +154,9 @@ export class ProductoService {
       conStock,
       skip,
       take,
+      lineaDenominacion,
+      superLineaDenominacion,
+      superLinea_id,
     );
     return {
       data: result.data.map((producto) => {
@@ -314,45 +322,47 @@ export class ProductoService {
    * @private
    */
   private async validarYPrepararCreacion(dto: CreateProductoDto) {
-    // Validar datos  (Domain - sin DB)
-    this.intrinsicValidationService.validarDatosBasicos({
-      denominacion: dto.denominacion,
-      marcaId: dto.marcaId,
-      lineaId: dto.lineaId,
-      alicuotaIva: dto.alicuotaIva,
-    });
-
-    // Validar unicidad (Infrastructure - DB)
-    await this.uniquenessValidator.validarDenominacionUnica(dto.denominacion);
-
-    if (dto.codigoProveedor) {
-      await this.uniquenessValidator.validarCodigoProveedorUnico(
-        dto.codigoProveedor,
-        0,
-      );
-    }
-    // 3 Validar entidades relacionadas existen (Infrastructure - DB)
-    const { marca, linea, } =
+    const { marca, linea, presentacion } =
       await this.relatedEntitiesValidator.validarYObtenerEntidadesRelacionadas(
         dto.marcaId,
         dto.lineaId,
-
+        dto.presentacionId,
       );
 
-    //  Validar reglas de negocio sobre entidades (Domain)
-    this.validationService.validarEntidadesRelacionadas(
-      marca,
-      linea,
+    this.validationService.validarEntidadesRelacionadas(marca, linea);
+    const esPersonalizada = dto.denominacionPersonalizada === true;
+    const denominacion = esPersonalizada
+      ? DenominacionProducto.crearManual(dto.denominacion).getValor()
+      : DenominacionProducto.generarAutomatica(
+          marca.denominacion,
+          linea.denominacion,
+          presentacion.denominacion,
+        ).getValor();
 
-    );
+    this.intrinsicValidationService.validarDatosBasicos({
+      denominacion,
+      marcaId: dto.marcaId,
+      lineaId: dto.lineaId,
+      alicuotaIva: dto.alicuotaIva,
+      precio: dto.precio,
+    });
 
+    await this.uniquenessValidator.validarDenominacionUnica(denominacion);
+    if (dto.codigoProveedor) {
+      await this.uniquenessValidator.validarCodigoProveedorUnico(dto.codigoProveedor, 0);
+    }
 
-    //  Validar usuario existe (Infrastructure)
     const usuario = await this.usuarioValidator.validarUsuarioExiste(
       dto.usuarioCreatedId,
     );
 
-    return { marca, linea, usuario };
+    return {
+      marca,
+      linea,
+      presentacion,
+      usuario,
+      productoDto: { ...dto, denominacion, denominacionPersonalizada: esPersonalizada },
+    };
   }
   /**
    * Orquesta todas las validaciones necesarias para actualizar un producto
@@ -370,6 +380,15 @@ export class ProductoService {
       );
 
     if (
+      dto.precio !== undefined &&
+      Number(dto.precio) !== Number(productoActual.precio ?? 0)
+    ) {
+      throw new BadRequestException(
+        'El precio debe modificarse desde el endpoint de cambio de precio indicando el motivo.',
+      );
+    }
+
+    if (
       productoActual.lineaId == null ||
       productoActual.marcaId == null
     ) {
@@ -377,43 +396,59 @@ export class ProductoService {
     }
 
     //  Validar datos intrínsecos
-    this.intrinsicValidationService.validarDatosBasicos({
-      denominacion: dto.denominacion ?? productoActual.denominacion,
-      marcaId: dto.marcaId ?? productoActual.marcaId,
-      lineaId: dto.lineaId ?? productoActual.lineaId,
-      alicuotaIva: dto.alicuotaIva ?? productoActual.alicuotaIva,
+    const marcaId = dto.marcaId ?? productoActual.marcaId;
+    const lineaId = dto.lineaId ?? productoActual.lineaId;
+    const presentacionId = dto.presentacionId ?? productoActual.presentacionId;
+    if (!presentacionId) {
+      throw new BadRequestException('La Presentación es obligatoria para el producto.');
+    }
+    const { marca, linea, presentacion } =
+      await this.relatedEntitiesValidator.validarYObtenerEntidadesRelacionadas(
+        marcaId,
+        lineaId,
+        presentacionId,
+      );
 
+    this.validationService.validarEntidadesRelacionadas(marca, linea);
+    const esPersonalizada = dto.denominacionPersonalizada
+      ?? productoActual.denominacionPersonalizada
+      ?? false;
+    const denominacion = esPersonalizada
+      ? DenominacionProducto.crearManual(dto.denominacion ?? productoActual.denominacion).getValor()
+      : DenominacionProducto.generarAutomatica(
+          marca.denominacion,
+          linea.denominacion,
+          presentacion.denominacion,
+        ).getValor();
+
+    this.intrinsicValidationService.validarDatosBasicos({
+      denominacion,
+      marcaId,
+      lineaId,
+      alicuotaIva: dto.alicuotaIva ?? productoActual.alicuotaIva,
+      precio: dto.precio ?? productoActual.precio,
     });
 
-    // Validar unicidad (excluyendo el ID actual)
-    if (dto.denominacion) {
-      await this.uniquenessValidator.validarDenominacionUnica(
-        dto.denominacion,
-        id,
-      );
-    }
+    await this.uniquenessValidator.validarDenominacionUnica(denominacion, id);
 
-    // Validar entidades relacionadas
-    const { marca, linea, } =
-      await this.relatedEntitiesValidator.validarYObtenerEntidadesRelacionadas(
-        dto.marcaId ?? productoActual.marcaId,
-        dto.lineaId ?? productoActual.lineaId,
-
-      );
-
-    //  Validar reglas de negocio
-    this.validationService.validarEntidadesRelacionadas(
-      marca,
-      linea,
-
-    );
-
-    // 5 Validar usuario
     const usuario = await this.usuarioValidator.validarUsuarioExiste(
       dto.usuarioUpdatedId,
     );
 
-    return { marca, linea, usuario };
+    return {
+      marca,
+      linea,
+      presentacion,
+      usuario,
+      productoDto: {
+        ...dto,
+        denominacion,
+        denominacionPersonalizada: esPersonalizada,
+        marcaId,
+        lineaId,
+        presentacionId,
+      },
+    };
   }
 
 

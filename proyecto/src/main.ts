@@ -8,7 +8,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-
+ 
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Convierte el cuerpo a la clase del DTO

@@ -1,3 +1,5 @@
+import { Presentacion } from "./modules/gestion-productos/presentacion/domain/entities/presentacion.entity";
+import { SuperLinea } from "./modules/gestion-productos/super-linea/domain/entities/super-linea.entity";
 import { Linea } from "./modules/gestion-productos/linea/domain/entities/linea.entity";
 import { Marca } from "./modules/gestion-productos/marca/domain/entities/marca.entity";
 import { ProductoOperacion } from "./modules/gestion-productos/producto-operacion/entities/producto-operacion.entity";
@@ -17,7 +19,9 @@ import { Personal } from "./modules/organizacion/personal/domain/entities/person
 import { Proveedor } from "./modules/organizacion/proveedor/domain/entities/proveedor.entity";
 
  
-export const entities = [Marca,
+export const entities = [Presentacion,
+                        SuperLinea,
+                        Marca,
                         Linea, 
                         Producto,
                         ProductoOperacion,

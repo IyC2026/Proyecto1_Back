@@ -6,11 +6,13 @@ import {
   IsString,
   MaxLength,
   Matches,
+  ValidateIf,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class UpdateProductoDto extends PartialType(CreateProductoDto) {
-  @Transform(({ value }) => value.trim().toLowerCase())
+  @Transform(({ value }) => typeof value === 'string' ? value.trim().toLowerCase() : value)
+  @ValidateIf((dto) => dto.denominacionPersonalizada === true)
   @IsString({ message: 'La denominación debe ser una cadena de texto.' }) // Valida que sea string
   @IsNotEmpty({ message: 'La denominación no puede estar vacía.' }) // Valida que no esté vacía
   @MaxLength(255, { message: 'La denominación no puede estar vacía.' })
@@ -18,7 +20,7 @@ export class UpdateProductoDto extends PartialType(CreateProductoDto) {
     message:
       'La denominación solo puede contener letras, números, espacios, puntos, guiones y barras.',
   })
-  denominacion: string;
+  denominacion?: string;
 
   @IsNotEmpty({ message: 'El usuarioUpdatedId es obligatorio.' })
   @IsInt({ message: 'El usuarioUpdatedId debe ser un número entero.' })

@@ -47,10 +47,14 @@ export class LineaPersistenceAdapter
         stockMinimo: data.stockMinimo,
         usuarioCreatedId: data.usuarioCreatedId,
         observacion: data.observacion,
+        //SUPERLINEA------------------------------
+        superLineaId: data.superLineaId,
+        superLinea: data.superLineaId
+          ? ({ id: data.superLineaId } as any)
+          : undefined,
       });
 
       const entityGuardada = await repo.save(nuevaEntity);
-
 
       return entityGuardada;
     } catch (error) {
@@ -80,7 +84,14 @@ export class LineaPersistenceAdapter
     entity.denominacion = data.denominacion ?? entity.denominacion;
     entity.utilizaStockMinimo = data.utilizaStockMinimo;
     entity.stockMinimo = data.stockMinimo ?? 0;
-    entity.usuarioCreatedId = data.usuarioCreatedId;
+    entity.usuarioUpdatedId = data.usuarioUpdatedId;
+    //SUPERLINEA------------------------------
+    if (data.superLineaId !== undefined) {
+      entity.superLineaId = data.superLineaId;
+      entity.superLinea = data.superLineaId
+        ? ({ id: data.superLineaId } as any)
+        : null;
+    }
 
     // Guardar entidad antes de procesar sublíneas (opcional según lógica de negocio)
     const entityActualizada = await repo.save(entity);
@@ -92,6 +103,10 @@ export class LineaPersistenceAdapter
     try {
       const entity = await this.repository
         .createQueryBuilder('linea')
+
+        //SUPERLINEA------------------------------
+        .leftJoinAndSelect('linea.superLinea', 'superLinea')
+
         .where('linea.id = :id', { id })
         .andWhere('linea.deletedAt IS NULL')
         .getOne();
@@ -179,6 +194,9 @@ export class LineaPersistenceAdapter
   ): Promise<{ data: Linea[]; total: number }> {
     try {
       const query = this.baseQuery(incluirEliminados)
+      
+      //SUPERLINEA------------------------------
+        .leftJoinAndSelect(`${this.ALIAS}.superLinea`, 'superLinea');
 
       if (denominacion) {
         query.andWhere(`UPPER(${this.ALIAS}.denominacion) LIKE :denominacion`, {

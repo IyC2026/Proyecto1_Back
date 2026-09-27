@@ -25,8 +25,9 @@ export class SeedAllService {
    
     } catch (error) {
       this.logger.error('❌ Error al ejecutar los seeds:', error);
+      throw error;
     }
-  
+
     this.logger.log('✅ Todos los seeds han sido ejecutados.');
   }
   

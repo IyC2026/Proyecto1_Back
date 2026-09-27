@@ -5,11 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
   Index,
   JoinColumn,
 } from 'typeorm';
 import { Linea } from '../../../linea/domain/entities/linea.entity';
 import { Marca } from '../../../marca/domain/entities/marca.entity';
+import { Presentacion } from '../../../presentacion/domain/entities/presentacion.entity';
 import { AlicuotaIva } from 'src/modules/organizacion/enums/alicuota-iva.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { ProductoOperacion } from '../../../producto-operacion/entities/producto-operacion.entity';
@@ -18,6 +20,7 @@ import { MonetarioColumn } from 'src/modules/common/decorators/monetario-column.
 import { CantidadColumn } from 'src/modules/common/decorators/cantidad-column.decorator';
 import { PorcentajeColumn } from 'src/modules/common/decorators/porcentaje-column.decorator';
 import { Proveedor } from 'src/modules/organizacion/proveedor/domain/entities/proveedor.entity';
+import { HistorialPrecio } from './historial-precio.entity';
 
 @Entity('producto')
 export class Producto {
@@ -149,6 +152,18 @@ export class Producto {
   @Column({ type: 'int', nullable: true })
   marcaId?: number;
 
+  // ========== PRESENTACION ==========
+  @ApiProperty({ description: 'Formato de presentación comercial' })
+  @ManyToOne(() => Presentacion, (presentacion) => presentacion.productos)
+  @JoinColumn({ name: 'presentacion_id' })
+  presentacion: Presentacion;
+
+  @Column({ name: 'presentacion_id', type: 'int', nullable: true })
+  presentacionId?: number;
+
+  @ApiProperty({ description: 'Indica si la denominación fue editada manualmente por el usuario' })
+  @Column('boolean', { default: false })
+  denominacionPersonalizada: boolean;
 
   @Column({ default: false })
   utilizaPack: boolean;
@@ -172,4 +187,7 @@ export class Producto {
 
   @Column({ type: 'text', nullable: true })
   codigoReferencia?: string | null;
+
+  @OneToMany(() => HistorialPrecio, (historial) => historial.producto)
+  historialPrecios: HistorialPrecio[];
 }

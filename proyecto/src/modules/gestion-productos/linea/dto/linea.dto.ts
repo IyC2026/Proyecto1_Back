@@ -9,6 +9,18 @@ import {
 } from 'class-validator';
 
 export class LineaDto {
+  //SUPERLÍNEA--------------------------------
+  @ApiProperty({ example: 1, description: 'ID de la SuperLínea padre' })
+  @IsOptional()
+  @IsInt()
+  superLineaId?: number;
+
+  @ApiProperty({ example: 'Bebidas', description: 'Nombre de la SuperLínea padre', required: false })
+  @IsOptional()
+  @IsString()
+  superLineaNombre?: string;
+  //----------------------------------
+
   @ApiProperty({ example: 123, description: 'ID del la linea' })
   @Type(() => Number)
   @IsInt()

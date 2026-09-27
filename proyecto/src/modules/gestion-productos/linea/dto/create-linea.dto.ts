@@ -12,6 +12,14 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLineaDto {
+  //SUPERLÍNEA------------------------
+  @ApiProperty({ description: 'ID de la SuperLínea a la que pertenece', example: 1 })
+  @IsNotEmpty({ message: 'La superLínea es obligatoria.' })
+  @IsInt({ message: 'El superLineaId debe ser un número entero.' })
+  superLineaId: number;
+  //----------------------------------
+
+  
   @Transform(({ value }) => value.trim().toLowerCase())
   @IsString({ message: 'La denominación debe ser una cadena de texto.' }) // Valida que sea string
   @IsNotEmpty({ message: 'La denominación no puede estar vacía.' }) // Valida que no esté vacía
