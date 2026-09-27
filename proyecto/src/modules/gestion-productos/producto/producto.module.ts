@@ -22,6 +22,7 @@ import { ProductoRelatedEntitiesValidator } from './infraestructure/validators/p
 import { ProductoValidationService } from './domain/services/producto-validation.service.ts';
 import { ProductoIntrinsicValidationService } from './domain/services/producto-intrinsic-validation.service.ts';
 import { ProductoDeletePolicy } from './application/policies/producto-delete.policy';
+import { PresentacionModule } from '../presentacion/presentacion.module';
 
 
 @Module({
@@ -30,6 +31,7 @@ import { ProductoDeletePolicy } from './application/policies/producto-delete.pol
     CommonModule,
     forwardRef(() => LineaModule),
     forwardRef(() => MarcaModule),
+    PresentacionModule,
     ProveedorModule,
     UsuarioModule,
   ],

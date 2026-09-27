@@ -250,7 +250,7 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
 
       if (denominacion) {
         condiciones.push(
-          `UPPER(producto.denominacion) LIKE UPPER(:denominacion)`,
+          `(UPPER(producto.denominacion) LIKE UPPER(:denominacion) OR UPPER(linea.denominacion) LIKE UPPER(:denominacion) OR UPPER(superLinea.denominacion) LIKE UPPER(:denominacion))`,
         );
         parametros.denominacion = `%${denominacion}%`;
       }
@@ -305,7 +305,26 @@ export class ProductoPersistenceAdapter implements IProductoRepository {
       query.andWhere('producto.stock > 0');
     }
     query.andWhere('producto.deletedAt IS NULL');
-    query.orderBy('producto.denominacion', 'ASC');
+    if (denominacion) {
+      query
+        .orderBy(
+          `CASE
+            WHEN UPPER(producto.denominacion) = UPPER(:terminoExacto) THEN 0
+            WHEN UPPER(producto.denominacion) LIKE UPPER(:terminoInicio)
+              OR UPPER(linea.denominacion) LIKE UPPER(:terminoInicio)
+              OR UPPER(superLinea.denominacion) LIKE UPPER(:terminoInicio) THEN 1
+            ELSE 2
+          END`,
+          'ASC',
+        )
+        .addOrderBy('producto.denominacion', 'ASC')
+        .setParameters({
+          terminoExacto: denominacion,
+          terminoInicio: `${denominacion}%`,
+        });
+    } else {
+      query.orderBy('producto.denominacion', 'ASC');
+    }
     // Paginación
     query.skip(skip).take(take);
 

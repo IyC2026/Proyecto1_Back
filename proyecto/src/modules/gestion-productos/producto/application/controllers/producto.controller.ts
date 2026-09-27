@@ -11,7 +11,9 @@ import {
   Query,
   UsePipes,
   UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 
 import { CreateProductoDto } from '../../dto/create-producto.dto';
 import { UpdateProductoDto } from '../../dto/update-producto.dto';
@@ -204,9 +206,12 @@ export class ProductoController {
   }
 
   @Put(':id/precio')
+  @UseGuards(AuthGuard)
+  @Roles('Root', 'Administrador', 'Empleado')
   async updatePrecio(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CambioPrecioDto,
+    @Req() request: Request,
   ) {
     this.logger.log(`Actualizando precio del Producto con ID: ${id}`);
     
@@ -217,7 +222,7 @@ export class ProductoController {
       precioAnterior: productoActual.precio ?? 0,
       precioNuevo: dto.precioNuevo,
       motivo: dto.motivo,
-      usuarioId: dto.usuarioId,
+      usuarioId: (request as Request & { user: { id: number } }).user.id,
     });
   }
 

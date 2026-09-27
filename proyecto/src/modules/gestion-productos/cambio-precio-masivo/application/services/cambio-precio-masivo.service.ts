@@ -72,10 +72,9 @@ export class CambioPrecioMasivoService {
   }
 
   private async prepararCambios(dto: CambioPrecioMasivoDto) {
-    const ids = CambioPrecioMasivoHelper.obtenerIds(dto.items);
-    const lineaId = CambioPrecioMasivoHelper.obtenerLineaId(dto);
-    const productos = await this.repository.findByIds(ids, lineaId);
-    return CambioPrecioMasivoHelper.prepararCambios(productos, dto.items, dto);
+    const { alcance, lineaId } = CambioPrecioMasivoHelper.obtenerAlcance(dto);
+    const productos = await this.repository.findByAlcance(alcance, lineaId);
+    return CambioPrecioMasivoHelper.prepararCambios(productos, dto);
   }
 
 }

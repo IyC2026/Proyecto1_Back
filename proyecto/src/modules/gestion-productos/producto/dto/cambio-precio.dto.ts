@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, Min, IsInt } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Min, IsInt, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CambioPrecioDto {
@@ -13,7 +13,7 @@ export class CambioPrecioDto {
   motivo: string;
 
   @ApiProperty({ description: 'ID del usuario que realiza la operación' })
+  @IsOptional()
   @IsInt()
-  @IsNotEmpty()
   usuarioId: number;
 }

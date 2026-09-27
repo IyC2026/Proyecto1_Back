@@ -10,9 +10,12 @@ export class DenominacionProducto {
   private readonly esPersonalizada: boolean;
 
   private constructor(valor: string, esPersonalizada = false) {
-    const normalizado = valor?.trim();
+    const normalizado = valor?.trim().replace(/\s+/g, ' ');
     if (!normalizado || normalizado.length === 0) {
       throw new BadRequestException('La denominación del producto no puede estar vacía.');
+    }
+    if (normalizado.length > 255) {
+      throw new BadRequestException('La denominación del producto no puede superar 255 caracteres.');
     }
     this.valor = normalizado;
     this.esPersonalizada = esPersonalizada;
@@ -27,13 +30,10 @@ export class DenominacionProducto {
     linea: string,
     presentacion: string,
   ): DenominacionProducto {
-    const partes = [marca?.trim(), linea?.trim(), presentacion?.trim()].filter(
-      (parte) => Boolean(parte) && parte.length > 0,
-    );
-
-    if (partes.length === 0) {
+    const partes = [marca, linea, presentacion].map((parte) => parte?.trim());
+    if (partes.some((parte) => !parte)) {
       throw new BadRequestException(
-        'No se puede generar la denominación sin al menos Marca, Línea o Presentación.',
+        'No se puede generar la denominación: Marca, Línea y Presentación deben tener denominación.',
       );
     }
 

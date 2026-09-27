@@ -8,7 +8,7 @@ describe('CambioPrecioMasivoService', () => {
   let service: CambioPrecioMasivoService;
   let productoPrecioService: jest.Mocked<ProductoPrecioService>;
   let dataSource: { createQueryRunner: jest.Mock };
-  let repository: { findByIds: jest.Mock; actualizarPrecio: jest.Mock };
+  let repository: { findByAlcance: jest.Mock; actualizarPrecio: jest.Mock };
 
   const mockQueryRunner = {
     connect: jest.fn(),
@@ -27,7 +27,7 @@ describe('CambioPrecioMasivoService', () => {
       createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
     };
     repository = {
-      findByIds: jest.fn(),
+      findByAlcance: jest.fn(),
       actualizarPrecio: jest.fn(),
     };
 
@@ -63,7 +63,7 @@ describe('CambioPrecioMasivoService', () => {
       { id: 2, precio: 200, denominacion: 'B' },
     ];
 
-    repository.findByIds.mockResolvedValue(productos);
+    repository.findByAlcance.mockResolvedValue(productos);
 
     const result = await service.aplicarCambios({
       items: [{ id: 1 }, { id: 2 }],
@@ -78,7 +78,7 @@ describe('CambioPrecioMasivoService', () => {
   });
 
   it('should reject any batch that produces a non-positive price', async () => {
-    repository.findByIds.mockResolvedValue([{ id: 1, precio: 0, denominacion: 'A' }]);
+    repository.findByAlcance.mockResolvedValue([{ id: 1, precio: 0, denominacion: 'A' }]);
 
     await expect(
       service.aplicarCambios({
@@ -91,7 +91,7 @@ describe('CambioPrecioMasivoService', () => {
   });
 
   it('should pass the line filter to the repository', async () => {
-    repository.findByIds.mockResolvedValue([
+    repository.findByAlcance.mockResolvedValue([
       { id: 1, lineaId: 4, precio: 100, denominacion: 'A' },
     ]);
 
@@ -103,12 +103,12 @@ describe('CambioPrecioMasivoService', () => {
       lineaId: 4,
     });
 
-    expect(repository.findByIds).toHaveBeenCalledWith([1], 4);
+    expect(repository.findByAlcance).toHaveBeenCalledWith('linea', 4);
   });
 
   it('should persist the final prices and register history for each product', async () => {
     const productos = [{ id: 1, precio: 100, denominacion: 'A' }];
-    repository.findByIds.mockResolvedValue(productos);
+    repository.findByAlcance.mockResolvedValue(productos);
 
     productoPrecioService.registerPriceChange.mockResolvedValue({
       id: 1,
@@ -121,9 +121,10 @@ describe('CambioPrecioMasivoService', () => {
     } as any);
 
     const result = await service.guardarCambios({
-      items: [{ id: 1, precio: 110, precioFinal: 110 }],
+      items: [{ id: 1 }],
       usuarioCreatedId: 5,
       tipoAjuste: 'porcentaje',
+      porcentaje: 10,
       alcance: 'global',
     });
 
