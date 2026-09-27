@@ -119,19 +119,19 @@ describe('UsuarioService', () => {
   describe('updateDatos', () => {
     it('lanza NotFoundException si el usuario no existe', async () => {
       mockRepository.findOne.mockResolvedValue(null);
-      await expect(service.updateDatos(99, { mail: 'x@x.com' })).rejects.toThrow(NotFoundException);
+      await expect(service.updateDatos(99, { mail: 'x@x.com', usuarioUpdatedId: 1 })).rejects.toThrow(NotFoundException);
     });
 
     it('lanza ConflictException si el nuevo mail ya está en uso', async () => {
       mockRepository.findOne.mockResolvedValue({ id: 1, mail: 'viejo@b.com', roles: [] });
       mockRepository.findByMail.mockResolvedValue({ id: 2, mail: 'nuevo@b.com' });
-      await expect(service.updateDatos(1, { mail: 'nuevo@b.com' })).rejects.toThrow(ConflictException);
+      await expect(service.updateDatos(1, { mail: 'nuevo@b.com', usuarioUpdatedId: 1 })).rejects.toThrow(ConflictException);
     });
 
     it('lanza BadRequestException si rolesIds está vacío', async () => {
       mockRepository.findOne.mockResolvedValue({ id: 1, mail: 'a@b.com', roles: [] });
       mockRepository.findByMail.mockResolvedValue(null);
-      await expect(service.updateDatos(1, { rolesIds: [] })).rejects.toThrow(BadRequestException);
+      await expect(service.updateDatos(1, { rolesIds: [], usuarioUpdatedId: 1 })).rejects.toThrow(BadRequestException);
     });
 
     it('actualiza datos correctamente', async () => {
@@ -141,7 +141,7 @@ describe('UsuarioService', () => {
       mockRolService.findByIds.mockResolvedValue([{ id: 2 }]);
       mockRepository.updateDatos.mockResolvedValue(undefined);
 
-      await service.updateDatos(1, { mail: 'nuevo@b.com', denominacion: 'Nuevo', rolesIds: [2] });
+      await service.updateDatos(1, { mail: 'nuevo@b.com', denominacion: 'Nuevo', rolesIds: [2], usuarioUpdatedId: 1 });
 
       expect(usuario.mail).toBe('nuevo@b.com');
       expect(usuario.denominacion).toBe('Nuevo');

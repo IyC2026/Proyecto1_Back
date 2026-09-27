@@ -17,6 +17,12 @@ const mockRepository = {
 
 const mockUsuarioService = { findOne: jest.fn() };
 const mockPoliticaEliminacion = { tieneProductosActivosParaMarca: jest.fn() };
+const marcaInput = (denominacion: string) => ({ denominacion, usuarioCreatedId: 1 });
+const marcaUpdateInput = (denominacion: string) => ({
+  denominacion,
+  updatedAt: new Date(),
+  usuarioUpdatedId: 1,
+});
 
 describe('MarcaService', () => {
   let service: MarcaService;
@@ -33,13 +39,13 @@ describe('MarcaService', () => {
   describe('create', () => {
     it('lanza ConflictException si la denominación ya existe', async () => {
       mockRepository.findByDenominacionWith.mockResolvedValue({ id: 1 });
-      await expect(service.create({ denominacion: 'Nike' })).rejects.toThrow(ConflictException);
+      await expect(service.create(marcaInput('Nike'))).rejects.toThrow(ConflictException);
     });
 
     it('crea la marca correctamente', async () => {
       mockRepository.findByDenominacionWith.mockResolvedValue(null);
       mockRepository.create.mockResolvedValue({ id: 1, denominacion: 'Nike' });
-      const result = await service.create({ denominacion: 'Nike' });
+      const result = await service.create(marcaInput('Nike'));
       expect(result.mensaje).toContain('Nike');
     });
   });
@@ -47,25 +53,25 @@ describe('MarcaService', () => {
   describe('update', () => {
     it('lanza NotFoundException si la marca no existe', async () => {
       mockRepository.findOne.mockResolvedValue(null);
-      await expect(service.update(99, { denominacion: 'X' })).rejects.toThrow(NotFoundException);
+      await expect(service.update(99, marcaUpdateInput('X'))).rejects.toThrow(NotFoundException);
     });
 
     it('lanza ForbiddenException si la marca es del sistema', async () => {
       mockRepository.findOne.mockResolvedValue({ id: 1, sistema: 1 });
-      await expect(service.update(1, { denominacion: 'X' })).rejects.toThrow(ForbiddenException);
+      await expect(service.update(1, marcaUpdateInput('X'))).rejects.toThrow(ForbiddenException);
     });
 
     it('lanza ConflictException si la nueva denominación ya está en uso', async () => {
       mockRepository.findOne.mockResolvedValue({ id: 1, sistema: 0 });
       mockRepository.findByDenominacionWith.mockResolvedValue({ id: 2 });
-      await expect(service.update(1, { denominacion: 'Adidas' })).rejects.toThrow(ConflictException);
+      await expect(service.update(1, marcaUpdateInput('Adidas'))).rejects.toThrow(ConflictException);
     });
 
     it('actualiza correctamente', async () => {
       mockRepository.findOne.mockResolvedValue({ id: 1, sistema: 0 });
       mockRepository.findByDenominacionWith.mockResolvedValue(null);
       mockRepository.update.mockResolvedValue({ id: 1, denominacion: 'Editada' });
-      const result = await service.update(1, { denominacion: 'Editada' });
+      const result = await service.update(1, marcaUpdateInput('Editada'));
       expect(result.mensaje).toContain('Editada');
     });
   });
