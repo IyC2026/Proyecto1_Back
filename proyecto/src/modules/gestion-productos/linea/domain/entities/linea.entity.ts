@@ -30,7 +30,7 @@ export class Linea {
   superLinea: SuperLinea;
 
   @ApiProperty({ description: 'ID de la SuperLínea padre', required: false })
-  @Column({ name: 'super_linea_id', type: 'int', nullable: true })
+  @Column({ name: 'super_linea_id', type: 'int', nullable: false })
   superLineaId: number;
 //----------------------------------------
 

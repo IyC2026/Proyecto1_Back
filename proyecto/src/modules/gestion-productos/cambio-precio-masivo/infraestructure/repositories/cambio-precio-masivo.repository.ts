@@ -10,8 +10,8 @@ export class CambioPrecioMasivoRepository implements ICambioPrecioMasivoReposito
 
   constructor(private readonly persistenceAdapter: CambioPrecioMasivoPersistenceAdapter) {}
 
-  findByIds(ids: number[], lineaId?: number, manager?: EntityManager): Promise<Producto[]> {
-    return this.persistenceAdapter.findByIds(ids, lineaId, manager);
+  findByAlcance(alcance: 'global' | 'linea', lineaId?: number, manager?: EntityManager): Promise<Producto[]> {
+    return this.persistenceAdapter.findByAlcance(alcance, lineaId, manager);
   }
 
   actualizarPrecio(

@@ -1,5 +1,8 @@
 import {
   Entity,
+  BeforeRemove,
+  BeforeSoftRemove,
+  BeforeUpdate,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
@@ -9,6 +12,7 @@ import {
 import { Producto } from './producto.entity';
 import { Usuario } from 'src/modules/gestion-usuario/usuario/domain/entities/usuario.entity';
 import { MonetarioColumn } from 'src/modules/common/decorators/monetario-column.decorator';
+import { BadRequestException } from '@nestjs/common';
 
 @Entity('historial_precio')
 export class HistorialPrecio {
@@ -40,4 +44,13 @@ export class HistorialPrecio {
 
   @Column({ name: 'usuario_id', type: 'int', nullable: false })
   usuarioId: number;
+
+  @BeforeUpdate()
+  @BeforeRemove()
+  @BeforeSoftRemove()
+  impedirMutacion(): void {
+    throw new BadRequestException(
+      'Los registros del historial de precios son inmutables y no se pueden modificar ni eliminar.',
+    );
+  }
 }

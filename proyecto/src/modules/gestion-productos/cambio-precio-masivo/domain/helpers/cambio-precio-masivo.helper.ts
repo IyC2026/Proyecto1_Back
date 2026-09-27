@@ -6,6 +6,8 @@ type CambioPrecioMasivoParametros = {
   tipoAjuste?: 'porcentaje' | 'montoFijo';
   porcentaje?: number;
   valor?: number;
+  alcance?: 'global' | 'linea';
+  lineaId?: number;
 };
 
 export type CambioPrecioPreparado = {
@@ -15,51 +17,29 @@ export type CambioPrecioPreparado = {
 };
 
 export class CambioPrecioMasivoHelper {
-  static normalizarItems(items: any[] = []) {
-    return items.filter((item) => item && item.id !== undefined && item.id !== null);
-  }
-
-  static obtenerIds(items: any[] = []): number[] {
-    return this.normalizarItems(items).map((item) => item.id);
-  }
-
-  static obtenerLineaId(dto: CambioPrecioMasivoParametros & { alcance?: 'global' | 'linea'; lineaId?: number }): number | undefined {
-    if (dto.alcance !== 'linea') return undefined;
+  static obtenerAlcance(dto: CambioPrecioMasivoParametros): { alcance: 'global' | 'linea'; lineaId?: number } {
+    const alcance = dto.alcance ?? 'global';
+    if (alcance !== 'linea') return { alcance: 'global' };
     if (!Number.isInteger(dto.lineaId)) {
       throw new BadRequestException(
         'Debe indicarse una línea válida cuando el alcance es linea.',
       );
     }
-    return dto.lineaId;
+    return { alcance, lineaId: dto.lineaId };
   }
 
   static prepararCambios(
     productos: Producto[],
-    items: any[] = [],
     dto: CambioPrecioMasivoParametros,
   ): CambioPrecioPreparado[] {
-    const itemsNormalizados = this.normalizarItems(items);
-
-    if (itemsNormalizados.length === 0) {
-      throw new BadRequestException('Debe enviarse al menos un producto para actualizar.');
+    if (productos.length === 0) {
+      throw new BadRequestException('No hay productos activos dentro del alcance seleccionado.');
     }
 
-    if (productos.length !== itemsNormalizados.length) {
-      throw new BadRequestException(
-        'Hay productos que no existen o no están disponibles para actualizar.',
-      );
-    }
-
-    const productosPorId = new Map(productos.map((producto) => [producto.id, producto]));
-
-    return itemsNormalizados.map((item) => {
-      const producto = productosPorId.get(item.id);
-      if (!producto) {
-        throw new BadRequestException(`Producto con ID ${item.id} no encontrado.`);
-      }
-
+    const ajuste = this.resolverAjuste(dto);
+    return productos.map((producto) => {
       const precioAnterior = Number(producto.precio ?? 0);
-      const precioNuevo = this.calcularPrecioFinal(producto, item, dto);
+      const precioNuevo = this.calcularPrecioFinal(producto, ajuste);
       this.validarPrecio(precioNuevo, producto.denominacion);
 
       return { producto, precioAnterior, precioNuevo };
@@ -68,45 +48,15 @@ export class CambioPrecioMasivoHelper {
 
   static calcularPrecioFinal(
     producto: { precio?: number },
-    item: any,
-    dto: CambioPrecioMasivoParametros,
+    ajuste: { tipoAjuste: 'porcentaje' | 'montoFijo'; valor: number },
   ): number {
     const precioBase = Number(producto.precio ?? 0);
 
-    if (dto.tipoAjuste === 'porcentaje' || dto.porcentaje !== undefined) {
-      const porcentaje = Number(dto.porcentaje ?? 0);
-      return redondear(precioBase * (1 + porcentaje / 100));
+    if (ajuste.tipoAjuste === 'porcentaje') {
+      return redondear(precioBase * (1 + ajuste.valor / 100));
     }
 
-    if (dto.tipoAjuste === 'montoFijo' || dto.valor !== undefined) {
-      const valor = Number(dto.valor ?? 0);
-      return redondear(precioBase + valor);
-    }
-
-    return this.obtenerPrecioDesdeItem(producto, item, dto);
-  }
-
-  static obtenerPrecioDesdeItem(
-    producto: { precio?: number },
-    item: any,
-    dto: CambioPrecioMasivoParametros,
-  ): number {
-    const claves = [
-      'precioFinal',
-      'precioNuevo',
-      'precio',
-      'precioOcasionalConIvaNuevo',
-      'precioMayoristaConIvaNuevo',
-      'precioClienteConIvaNuevo',
-      'precioOfertaConIvaNuevo',
-    ];
-
-    for (const clave of claves) {
-      const valor = Number(item?.[clave]);
-      if (Number.isFinite(valor)) return redondear(valor);
-    }
-
-    return redondear(Number(producto.precio ?? 0));
+    return redondear(precioBase + ajuste.valor);
   }
 
   static validarPrecio(precio: number, denominacion: string): void {
@@ -118,14 +68,30 @@ export class CambioPrecioMasivoHelper {
   }
 
   static crearMotivo(dto: CambioPrecioMasivoParametros): string {
-    if (dto.tipoAjuste === 'porcentaje' || dto.porcentaje !== undefined) {
-      return `Cambio masivo por porcentaje: ${dto.porcentaje ?? 0}%`;
+    const ajuste = this.resolverAjuste(dto);
+    return ajuste.tipoAjuste === 'porcentaje'
+      ? `Cambio masivo por porcentaje: ${ajuste.valor}%`
+      : `Cambio masivo por monto fijo: ${ajuste.valor}`;
+  }
+
+  private static resolverAjuste(dto: CambioPrecioMasivoParametros) {
+    const tienePorcentaje = dto.porcentaje !== undefined;
+    const tieneMonto = dto.valor !== undefined;
+    const tipoAjuste = dto.tipoAjuste
+      ?? (tienePorcentaje !== tieneMonto
+        ? (tienePorcentaje ? 'porcentaje' : 'montoFijo')
+        : undefined);
+
+    if (!tipoAjuste || (tipoAjuste === 'porcentaje' && (!tienePorcentaje || tieneMonto))
+      || (tipoAjuste === 'montoFijo' && (!tieneMonto || tienePorcentaje))) {
+      throw new BadRequestException('Debe indicar un único tipo de ajuste y su valor numérico.');
     }
 
-    if (dto.tipoAjuste === 'montoFijo' || dto.valor !== undefined) {
-      return `Cambio masivo por monto fijo: ${dto.valor ?? 0}`;
+    const valor = Number(tipoAjuste === 'porcentaje' ? dto.porcentaje : dto.valor);
+    if (!Number.isFinite(valor)) {
+      throw new BadRequestException('El valor del ajuste debe ser un número válido.');
     }
 
-    return 'Cambio masivo de precios';
+    return { tipoAjuste, valor };
   }
 }

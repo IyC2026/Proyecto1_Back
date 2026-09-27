@@ -11,6 +11,7 @@ export class ProductoIntrinsicValidationService {
     marcaId: number;
     lineaId: number;
     alicuotaIva?: number;
+    precio?: number;
     precioMayorista?: number;
     precioCliente?: number;
     precioOcasional?: number;
@@ -18,6 +19,7 @@ export class ProductoIntrinsicValidationService {
     this.validarDenominacion(datos.denominacion);
     this.validarIds(datos.marcaId, datos.lineaId);
     this.validarPrecios(
+      datos.precio,
       datos.precioMayorista,
       datos.precioCliente,
       datos.precioOcasional,
@@ -56,26 +58,31 @@ export class ProductoIntrinsicValidationService {
    * Valida la jerarquía de precios: Mayorista <= Cliente <= Ocasional
    */
   private validarPrecios(
+    precio?: number,
     precioMayorista?: number,
     precioCliente?: number,
     precioOcasional?: number,
   ): void {
-    if (precioMayorista !== undefined && precioMayorista < 0) {
+    if (precio !== undefined && (!Number.isFinite(precio) || precio <= 0)) {
+      throw new BadRequestException('El precio debe ser un número mayor que cero.');
+    }
+
+    if (precioMayorista !== undefined && (!Number.isFinite(precioMayorista) || precioMayorista <= 0)) {
       throw new BadRequestException(
-        'El precio mayorista no puede ser negativo',
+        'El precio mayorista debe ser mayor que cero.',
       );
     }
-    if (precioCliente !== undefined && precioCliente < 0) {
-      throw new BadRequestException('El precio cliente no puede ser negativo');
+    if (precioCliente !== undefined && (!Number.isFinite(precioCliente) || precioCliente <= 0)) {
+      throw new BadRequestException('El precio cliente debe ser mayor que cero.');
     }
-    if (precioOcasional !== undefined && precioOcasional < 0) {
+    if (precioOcasional !== undefined && (!Number.isFinite(precioOcasional) || precioOcasional <= 0)) {
       throw new BadRequestException(
-        'El precio ocasional no puede ser negativo',
+        'El precio ocasional debe ser mayor que cero.',
       );
     }
 
     // Validar jerarquía: Mayorista <= Cliente <= Ocasional
-    if (precioMayorista && precioCliente) {
+    if (precioMayorista !== undefined && precioCliente !== undefined) {
       if (precioMayorista > precioCliente) {
         throw new BadRequestException(
           'El precio Mayorista no puede superar el precio Cliente',
@@ -83,7 +90,7 @@ export class ProductoIntrinsicValidationService {
       }
     }
 
-    if (precioCliente && precioOcasional) {
+    if (precioCliente !== undefined && precioOcasional !== undefined) {
       if (precioCliente > precioOcasional) {
         throw new BadRequestException(
           'El precio Cliente no puede superar el precio Ocasional',
@@ -91,7 +98,7 @@ export class ProductoIntrinsicValidationService {
       }
     }
 
-    if (precioMayorista && precioOcasional) {
+    if (precioMayorista !== undefined && precioOcasional !== undefined) {
       if (precioMayorista > precioOcasional) {
         throw new BadRequestException(
           'El precio Mayorista no puede superar el precio Ocasional',

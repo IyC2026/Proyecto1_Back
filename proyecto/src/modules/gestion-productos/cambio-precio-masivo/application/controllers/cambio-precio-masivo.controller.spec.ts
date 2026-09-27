@@ -47,7 +47,13 @@ describe('CambioPrecioMasivoController (integration)', () => {
       .patch('/cambio-precios/guardar-cambios')
       .set('Authorization', 'Bearer test-token')
       .send({
-        items: [{ id: 1, precioFinal: 110 }],
+        items: [{
+          id: 1,
+          precioFinal: 110,
+          denominacion: 'Producto legado',
+          stock: 8,
+          linea: { id: 2, denominacion: 'Línea' },
+        }],
         usuarioCreatedId: 999,
       })
       .expect(200)
@@ -58,7 +64,13 @@ describe('CambioPrecioMasivoController (integration)', () => {
       });
 
     expect(service.guardarCambios).toHaveBeenCalledWith({
-      items: [{ id: 1, precioFinal: 110 }],
+      items: [{
+        id: 1,
+        precioFinal: 110,
+        denominacion: 'Producto legado',
+        stock: 8,
+        linea: { id: 2, denominacion: 'Línea' },
+      }],
       usuarioCreatedId: 7,
     });
   });

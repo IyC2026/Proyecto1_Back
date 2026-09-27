@@ -26,7 +26,7 @@ export class ProductoPrecioService {
   ): Promise<HistorialPrecio> {
     const { productoId, precioAnterior, precioNuevo, motivo, usuarioId } = params;
 
-    if (precioNuevo <= 0) {
+    if (!Number.isFinite(precioNuevo) || precioNuevo <= 0) {
       throw new BadRequestException('El precio debe ser mayor a cero.');
     }
 
